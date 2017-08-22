@@ -1,17 +1,17 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
-import "./App.css";
+
 import steem from "steem/lib/browser";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      steem: ""
+      users: []
     };
   }
 
   componentDidMount() {
+    const self = this;
     //steem.api.setOptions({ url: "wss://40.121.220.248:9876" });
     console.log("Getting post content...");
     const resultP = steem.api.getContentAsync(
@@ -21,20 +21,44 @@ class App extends Component {
     resultP.then(result => console.log(result));
     steem.api.getAccounts(["ned", "dan"], function(err, response) {
       console.log(err, response);
+      let users = response.map(user => {
+        return { name: user.name, id: user.id, balance: user.balance };
+      });
+      self.setUsers(users);
     });
+  }
+  setUsers(users) {
+    this.setState({ users: users });
   }
 
   render() {
+    let userList = this.state.users.map(user => {
+      return (
+        <tr>
+          <td>
+            {user.id}
+          </td>
+          <td>
+            {user.name}
+          </td>
+          <td>
+            {user.balance}
+          </td>
+        </tr>
+      );
+    });
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        {this.state.steem}
+        <table>
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>User Name</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          {userList}
+        </table>
       </div>
     );
   }
